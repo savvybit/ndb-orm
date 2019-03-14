@@ -29,3 +29,5 @@ pip-log.txt
 .tox
 nosetests.xml
 
+# PyEnv
+.python-version

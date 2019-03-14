@@ -1995,7 +1995,11 @@ class KeyProperty(Property):
     path_flat = []
     for elm in v.key_value.path:
       path_flat.extend([elm.kind, elm.name if elm.name != '' else elm.id])
-    return key_module.Key(*path_flat, project=v.key_value.partition_id.project_id)
+    return key_module.Key(
+      *path_flat,
+      project=v.key_value.partition_id.project_id,
+      namespace=v.key_value.partition_id.namespace_id
+    )
 
 
 class BlobKeyProperty(Property):
@@ -2077,7 +2081,7 @@ class DateTimeProperty(Property):
 #       raise NotImplementedError('DatetimeProperty %s can only support UTC. '
 #                                 'Please derive a new Property to support '
 #                                 'alternative timezones.' % self._name)
-    
+
     v.timestamp_value.CopyFrom(helpers.datetime_to_pb_timestamp(value))
 
     # TODO old style ndb write - not possible anymore !
@@ -2913,7 +2917,7 @@ class Model(six.with_metaclass(MetaModel, _NotEqualMixin)):
       self._key = _validate_key(key, entity=self)
 #     elif (id is not None or parent is not None or
 #           project is not None or namespace is not None):
-  
+
     else:
       path = [id] if id else [] # path
       self._key = key_module.Key(
@@ -3191,14 +3195,14 @@ class Model(six.with_metaclass(MetaModel, _NotEqualMixin)):
     # iterate over properties
     projection = []
     for name, p in six.iteritems(pb.properties):
-      # TODO 
+      # TODO
       if p.meaning == PROPERTY_INDEX_VALUE:
         projection.append(name)
       indexed = not p.exclude_from_indexes
       prop = ent._get_property_for(name, p, indexed)
       prop._deserialize(name, ent, p)
 
-    # TODO 
+    # TODO
 #     ent._set_projection(projection)
     return ent
 
