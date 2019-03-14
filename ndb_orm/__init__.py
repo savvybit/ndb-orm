@@ -65,7 +65,7 @@ DEFAULT_MODEL = None
 real_entity_from_protobuf = None
 real_entity_to_protobuf = None
 
-def enable_use_with_gcd(project=None, namespace=None):
+def enable_use_with_gcd(project=None, namespace=None, client=None):
   from google.cloud import datastore
   from google.cloud.datastore.key import Key as DatastoreKey
   from google.cloud.datastore_v1.proto import entity_pb2
@@ -142,7 +142,28 @@ def enable_use_with_gcd(project=None, namespace=None):
     datastore.helpers.entity_from_protobuf = real_entity_from_protobuf
     datastore.helpers.entity_to_protobuf = real_entity_to_protobuf
 
-  key_module.KeyBase = DatastoreKey
+  class KeyBase(DatastoreKey):
+
+    """Custom Key class that implements missing legacy methods."""
+
+    @property
+    def client(self):
+      if client:
+        return client
+      raise NotImplementedError(
+        "`KeyBase` class doesn't have a client associated with it; "
+        "please provide a `client` too when enabling with GCD"
+      )
+
+    def get(self):
+      """Get the entity object by using the client with its key."""
+      return self.client.get(self)
+
+    def delete(self):
+      """Remove the entity object by using the client with its key."""
+      self.client.delete(self)
+
+  key_module.KeyBase = KeyBase
   entity_module.Entity = entity_pb2.Entity
   entity_module.Property = entity_module.Property
   entity_module.Reference = entity_module.Reference

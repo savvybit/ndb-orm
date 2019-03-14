@@ -45,7 +45,7 @@ class KeyClass(object):
       # accept both, plain strings and object instances as path
       if not isinstance(model_cls, six.string_types):
         path_args[i] = path_args[i]._get_kind()
-    
+
     return KeyBase(
       model_cls_str,
       *path_args,
