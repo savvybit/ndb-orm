@@ -95,8 +95,9 @@ def enable_use_with_gcd(project=None, namespace=None, client=None):
     entity.key = key
     return entity
 
-  def model_to_protobuf_datastore(entity_of_ndb_model, project, namespace=None):
-    if namespace and entity_of_ndb_model._key and (entity_of_ndb_model._key.namespace == None):
+  def model_to_protobuf_datastore(entity_of_ndb_model, project, namespace=namespace):
+    if namespace and entity_of_ndb_model._key and (
+            entity_of_ndb_model._key.namespace is None):
         # add namespace
         entity_of_ndb_model._key._namespace = namespace
     entity_of_ndb_model._prepare_for_put()
