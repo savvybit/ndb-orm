@@ -1998,7 +1998,7 @@ class KeyProperty(Property):
     return key_module.Key(
       *path_flat,
       project=v.key_value.partition_id.project_id,
-      namespace=v.key_value.partition_id.namespace_id
+      namespace=v.key_value.partition_id.namespace_id or None
     )
 
 
