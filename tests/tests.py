@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # vim: sts=2:ts=2:sw=2
 
+import unittest
 from unittest import TestCase, main
 
 import os
@@ -410,6 +411,47 @@ class ProtocolBuffer(TestCase):
 
     self.assertEqual(foo_recovered.a[2].b.c, 2)
     self.assertEqual(foo_recovered.a[2].b.d, 3)
+
+
+class KeyDepartment(Department):
+
+  dep_key = ndb.KeyProperty(kind=Department, required=True)
+
+
+@unittest.skipIf(not USE_DATASTORE, "not supported without Datastore emulator")
+class TestEntityKey(TestCase):
+
+  NAMESPACE = "test-namespace"
+
+  @classmethod
+  def setUpClass(cls):
+      from google.cloud import datastore
+      from .gcloud_credentials import EmulatorCredentials
+      cls.client = datastore.Client(project=PROJECT, credentials=EmulatorCredentials())
+      ndb.enable_use_with_gcd(project=PROJECT, namespace=cls.NAMESPACE, client=cls.client)
+
+  def setUp(self):
+    self._dep = Department(name="test_dep")
+    self.client.put(self._dep)
+    self._key_dep = KeyDepartment(name="test_key_dep", dep_key=self._dep.key)
+    self.client.put(self._key_dep)
+
+  def tearDown(self):
+    self.client.delete(self._dep.key)
+    self.client.delete(self._key_dep.key)
+
+  def test_retrieval(self):
+    self.assertEqual("test_key_dep", self._key_dep.key.get().name)
+
+  def test_removal(self):
+    self.assertTrue(self._key_dep.key.get())
+    self._key_dep.key.delete()
+    self.assertFalse(self._key_dep.key.get())
+
+  def test_keyprop_namespace(self):
+    key = self._key_dep.key.get().dep_key
+    self.assertEqual(self.NAMESPACE, key.namespace)
+    self.assertEqual("test_dep", key.get().name)
 
 
 if __name__ == '__main__':
