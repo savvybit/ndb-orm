@@ -97,7 +97,7 @@ def enable_use_with_gcd(project=None, namespace=None, client=None):
       *key._flat_path,
       parent=key._parent,
       namespace=key._namespace,
-      project=key._project,
+      project=key._project
     )
     return entity
 
