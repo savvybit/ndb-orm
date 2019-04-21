@@ -7,6 +7,7 @@ from unittest import TestCase, main
 import os
 import binascii
 import ndb_orm as ndb
+from ndb_orm import key_module
 from protorpc import messages
 from google.cloud.datastore_v1.proto import entity_pb2
 from . import person_pb2
@@ -442,6 +443,14 @@ class TestEntityKey(TestCase):
 
   def test_retrieval(self):
     self.assertEqual("test_key_dep", self._key_dep.key.get().name)
+
+  def test_self_retrieval(self):
+    dep = self._dep.key.get()
+    self.assertEqual("test_dep", dep.name)
+    self_key = dep.key
+    self.assertIsInstance(self_key, key_module.KeyBase)
+    self_dep = self_key.get()
+    self.assertEqual("test_dep", self_dep.name)
 
   def test_removal(self):
     self.assertTrue(self._key_dep.key.get())

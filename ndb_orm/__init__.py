@@ -92,7 +92,13 @@ def enable_use_with_gcd(project=None, namespace=None, client=None):
       return None
     entity = modelclass._from_pb(pb, key=key, set_key=False)
     #entity = modelclass._from_pb(pb, key=key, set_key=True)
-    entity.key = key
+    # NOTE(cmiN): Make sure we use the same augmented custom Key class.
+    entity.key = Key(
+      *key._flat_path,
+      parent=key._parent,
+      namespace=key._namespace,
+      project=key._project,
+    )
     return entity
 
   def model_to_protobuf_datastore(entity_of_ndb_model, project, namespace=namespace):
